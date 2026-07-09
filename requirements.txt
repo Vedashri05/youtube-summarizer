@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+httpx
+openai
+youtube-transcript-api
+python-dotenv
+pydantic
+aiosqlite
+tiktoken
