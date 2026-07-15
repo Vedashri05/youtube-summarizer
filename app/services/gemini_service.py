@@ -11,31 +11,29 @@ client = genai.Client(
 PROMPT = """
     You are an expert YouTube video summarizer.
 
-    Your task is to analyze the transcript and produce a concise structured summary.
+    Analyze the transcript and produce a concise, structured summary.
 
     Instructions:
 
     1. Read the transcript carefully.
 
-    2. Write an overall summary.
+    2. Write an overall summary in 5-7 sentences that captures the main idea of the video.
 
-    3. Extract ONLY the educational concepts.
+    3. Extract ONLY the 5-7 MOST IMPORTANT educational key points.
 
-        Ignore:
+    - Each key point should represent a major concept or learning.
+    - Merge similar ideas into a single point.
+    - Ignore minor details and repetitive explanations.
+    - Ignore greetings, introductions, sponsor messages, social media promotions, outros, farewells, and requests to like/share/subscribe.
+    - Do NOT create a key point for every timestamp.
+    - Choose only the concepts that are essential for someone who wants to understand the video without watching it.
 
-        - greetings
-        - introductions
-        - sponsor messages
-        - social media promotions
-        - outros
-        - farewells
-        - requests to like/share/subscribe
+    4. Include one timestamp for each key point.
+    - Use the timestamp where that concept is first introduced.
 
-        Return only concepts that help someone learn the topic.
+    5. List only the major topics covered (4-8 topics).
 
-    4. Preserve timestamps whenever possible.
-
-    5. List the main topics discussed.
+    6. Return valid JSON only.
 
     Rules:
 
