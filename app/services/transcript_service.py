@@ -5,7 +5,8 @@ from youtube_transcript_api._errors import (
 )
 from fastapi import HTTPException
 
-yt_api=YouTubeTranscriptApi()
+yt_api = YouTubeTranscriptApi()
+
 
 def fetch_transcript(video_id: str):
 
@@ -34,23 +35,33 @@ def fetch_transcript(video_id: str):
             status_code=500,
             detail=str(e)
         )
-    
+
+
 def format_timestamp(seconds: float) -> str:
+    """
+    Format seconds as MM:SS, or HH:MM:SS for videos longer than an hour.
+
+    A 2-hour lecture would otherwise produce timestamps like "97:14",
+    which do not match what the user sees on the YouTube player.
+    """
 
     total_seconds = int(seconds)
 
-    minutes = total_seconds // 60
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    secs = total_seconds % 60
 
-    seconds = total_seconds % 60
+    if hours:
+        return f"{hours:02}:{minutes:02}:{secs:02}"
 
-    return f"{minutes:02}:{seconds:02}"
+    return f"{minutes:02}:{secs:02}"
 
 
 def transcript_to_text(transcript):
 
     lines = []
-    for item in transcript:
 
+    for item in transcript:
         timestamp = format_timestamp(item.start)
         text = item.text
         lines.append(f"[{timestamp}] {text}")

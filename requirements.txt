@@ -1,9 +1,11 @@
 fastapi
 uvicorn
-httpx
-openai
+google-genai
 youtube-transcript-api
 python-dotenv
 pydantic
-aiosqlite
-tiktoken
+numpy
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
+email-validator

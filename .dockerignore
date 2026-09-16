@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual Environment
+venv/
+.env/
+
+# Git
+.git
+.gitignore
+
+# VS Code
+.vscode/
+
+# React
+frontend/node_modules/
+frontend/dist/
+
+# OS files
+.DS_Store
+
+# Cache
+cache.db
+*.db
