@@ -1,23 +1,29 @@
+import { GraduationCap, Code2, Zap, Briefcase } from "lucide-react";
+
 const MODES = [
   {
     id: "beginner",
     label: "Beginner",
     description: "Explain this video in simple language with basic examples.",
+    icon: GraduationCap,
   },
   {
     id: "technical",
     label: "Technical",
     description: "Preserve technical terminology, implementation details and mathematical reasoning.",
+    icon: Code2,
   },
   {
     id: "quick_revision",
     label: "Quick Revision",
     description: "Give me only the most important points I should remember.",
+    icon: Zap,
   },
   {
     id: "interview_prep",
     label: "Interview Prep",
     description: "Extract important concepts, definitions, formulas and likely interview questions.",
+    icon: Briefcase,
   },
 ];
 
@@ -31,6 +37,7 @@ function ModeSelector({ mode, onChange, disabled }) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {MODES.map((option) => {
           const isActive = option.id === mode;
+          const Icon = option.icon;
 
           return (
             <button
@@ -47,15 +54,21 @@ function ModeSelector({ mode, onChange, disabled }) {
                 }
                 ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
             >
-              <p
-                className={`font-semibold ${
-                  isActive ? "text-blue-700" : "text-slate-800"
-                }`}
-              >
-                {option.label}
-              </p>
+              <div className="flex items-center gap-2">
+                <Icon
+                  size={18}
+                  className={isActive ? "text-blue-600" : "text-slate-400"}
+                />
+                <p
+                  className={`font-semibold ${
+                    isActive ? "text-blue-700" : "text-slate-800"
+                  }`}
+                >
+                  {option.label}
+                </p>
+              </div>
 
-              <p className="text-xs text-slate-500 mt-1 leading-5">
+              <p className="text-xs text-slate-500 mt-1.5 leading-5">
                 {option.description}
               </p>
             </button>

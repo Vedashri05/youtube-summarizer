@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FileVideo } from "lucide-react";
 import Navbar from "./components/Navbar";
 import SearchBox from "./components/SearchBox";
 import ModeSelector from "./components/ModeSelector";
@@ -14,6 +15,25 @@ import JobStatus from "./components/JobStatus";
 import api from "./services/api";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
+function EmptyState() {
+  return (
+    <div className="max-w-5xl mx-auto mt-8">
+      <div className="border-2 border-dashed border-slate-300 rounded-2xl py-16 flex flex-col items-center text-center">
+        <span className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center mb-4">
+          <FileVideo size={26} className="text-blue-500" />
+        </span>
+        <p className="text-slate-600 font-medium">
+          No video selected yet
+        </p>
+        <p className="text-slate-400 text-sm mt-1 max-w-sm">
+          Paste a YouTube link above, or pick a video from your history on
+          the left, to see its summary here.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function Dashboard() {
   const [mode, setMode] = useState("technical");
   const [summary, setSummary] = useState(null);
@@ -22,16 +42,14 @@ function Dashboard() {
   const [error, setError] = useState("");
   const [historyKey, setHistoryKey] = useState(0);
 
-  const { logout } = useAuth();
-
-  const handleSummary = async (url) => {
+  const submitVideo = async (url, videoMode) => {
     try {
       setLoading(true);
       setError("");
       setSummary(null);
       setJobId(null);
 
-      const response = await api.post("/videos", { url, mode });
+      const response = await api.post("/videos", { url, mode: videoMode });
 
       // Kick off polling instead of waiting here - JobStatus takes over
       // and calls handleJobComplete once status === "complete".
@@ -45,6 +63,16 @@ function Dashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSummary = (url) => submitVideo(url, mode);
+
+  // Failed videos get a retry action in the sidebar instead of being a
+  // dead end. video_id is the YouTube ID, so the watch URL is
+  // reconstructable without needing to have stored the original link.
+  const handleRetry = (video) => {
+    const url = `https://www.youtube.com/watch?v=${video.video_id}`;
+    submitVideo(url, video.mode);
   };
 
   const handleJobComplete = (job) => {
@@ -78,21 +106,18 @@ function Dashboard() {
     }
   };
 
+  const showEmptyState = !loading && !jobId && !error && !summary;
+
   return (
     <div className="min-h-screen bg-slate-100 flex">
-      <VideoHistory onSelect={handleSelectFromHistory} refreshKey={historyKey} />
+      <VideoHistory
+        onSelect={handleSelectFromHistory}
+        onRetry={handleRetry}
+        refreshKey={historyKey}
+      />
 
       <div className="flex-1">
         <Navbar />
-
-        <div className="max-w-5xl mx-auto flex justify-end px-4 pt-2">
-          <button
-            onClick={logout}
-            className="text-sm text-slate-500 hover:text-slate-800 underline"
-          >
-            Log out
-          </button>
-        </div>
 
         <SearchBox onSummarize={handleSummary} loading={loading} />
 
@@ -107,6 +132,8 @@ function Dashboard() {
             {error}
           </div>
         )}
+
+        {showEmptyState && <EmptyState />}
 
         {summary && (
           <div className="max-w-5xl mx-auto mt-8 space-y-6 pb-10">
