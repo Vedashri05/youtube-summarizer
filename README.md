@@ -8,12 +8,12 @@ Built as a placement portfolio project to demonstrate production-style backend d
 
 ## ✨ Features
 
-- **Adaptive summaries** — choose Beginner, Technical, Quick Revision, or Interview Prep, and the prompt *and* the output schema adapt. Interview Prep adds a dedicated list of likely interview questions; the others don't.
-- **Chat with the Video** — ask questions in plain language and get answers grounded strictly in the transcript, with clickable timestamp citations back to the exact moment. Uses RAG (retrieval-augmented generation): the transcript is chunked, embedded, and only the relevant chunks are fed to the model — not the whole transcript.
-- **Semantic search** — search the transcript by meaning, not keywords. "How does the model learn?" surfaces the sections on gradient descent and backpropagation even if neither phrase appears in the transcript, using cosine similarity over embeddings with no LLM call involved.
-- **Asynchronous processing** — submitting a video returns a job ID immediately instead of blocking for minutes. A background pipeline (transcribing → indexing → chunking → summarizing) updates status as it runs, and the frontend polls and shows live progress.
-- **Accounts + history** — sign up, log in, and every video you summarize is saved to "My Videos," searchable and reopenable at any time.
-- **Caching** — a (video, summary style) pair is only ever generated once; repeat requests are served from SQLite instantly and don't re-spend API quota.
+- **Adaptive summaries** — Choose Beginner, Technical, Quick Revision, or Interview Prep, and the prompt *and* the output schema adapt. Interview Prep adds a dedicated list of likely interview questions.
+- **Chat with the Video** — Ask questions in plain language and get answers grounded strictly in the transcript, with clickable timestamp citations back to the exact moment. Uses RAG: the transcript is chunked, embedded, and only the relevant chunks are fed to the model — not the whole transcript.
+- **Semantic search** — Search the transcript by meaning, not keywords, using cosine similarity over embeddings with no LLM call involved.
+- **Asynchronous processing** — A background pipeline updates status as it runs, and the frontend polls and shows live progress.
+- **Accounts + history** — Sign up, log in, and every video you summarize is saved to "My Videos," searchable and reopenable at any time.
+- **Caching** — A (video, summary style) pair is only ever generated once; repeat requests are served from SQLite instantly and don't re-spend API quota.
 
 ---
 
@@ -56,22 +56,6 @@ Transcript indexing (chunk + embed) happens once per video and is shared across 
 **Frontend:** React (Vite), Tailwind CSS, Axios, `lucide-react`.
 
 **No vector database.** Search is scoped to one video at a time (a few hundred chunks), so brute-force cosine similarity over a NumPy matrix is faster than a network round-trip to a hosted vector DB would be. Embeddings are stored as raw `float32` blobs directly in SQLite.
-
----
-
-## 📡 API Overview
-
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| POST | `/auth/register` | – | Create an account, returns a JWT |
-| POST | `/auth/login` | – | Log in (OAuth2 form), returns a JWT |
-| POST | `/videos` | ✅ | Submit a YouTube URL + summary mode; returns a job ID immediately |
-| GET | `/videos/{job_id}` | ✅ | Poll processing status, or fetch the finished summary |
-| GET | `/videos` | ✅ | List the current user's video history |
-| POST | `/chat` | ✅ | Ask a question about a processed video; returns a grounded, cited answer |
-| POST | `/search` | ✅ | Semantic search over a processed video's transcript |
-
-Full interactive docs are available at `/docs` once the backend is running.
 
 ---
 
@@ -130,12 +114,3 @@ Visit `http://localhost:5173`, sign up, and paste a YouTube link.
 - **Free-tier Gemini quotas are small.** Generation (`gemini-2.5-flash`) is capped at 20 requests/day on the free tier, and embeddings are capped per-minute. Summarizing one video uses several generation calls (one per transcript chunk, plus a merge step); testing repeatedly can exhaust the daily quota. The app retries transient rate limits automatically but cannot bypass a daily cap.
 - **Transcript quality depends on YouTube's auto-captions.** Videos without manually-written captions can have ASR errors (mis-heard technical terms), which limits how clean chat/search results read — this is a data quality ceiling, not a bug in the retrieval logic.
 - **SQLite, not a hosted database.** Fine for a single-instance portfolio deployment; would need to move to Postgres for concurrent multi-instance production use.
-
----
-
-## 📌 Possible Next Steps
-
-- Move from SQLite to Postgres for multi-instance deployment
-- Rate-limit `/videos` per user to protect the shared Gemini quota
-- Export a video's summary/chat as PDF or Markdown
-- Support playlists (batch-process multiple videos into one job)
